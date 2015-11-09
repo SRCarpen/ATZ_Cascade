@@ -111,7 +111,7 @@ print(c('Handling Time = ',handle),quote=F)
 
 # Compute steady-state algae detritus
 pA = 0.3  # egestion coefficient BACK TO D for zoops feeding on algae
-pD = 0.3
+pD = pA
 s.D = 0.5/ZT # Sedimentation loss coefficient = sinking rate/ZT (Reynolds 1984)
 Dcoef = c(0,0,0) # vector to hold polynomial coefficients for detritus polynomial
 Dcoef[1] = pA*QAZ
@@ -237,6 +237,7 @@ load(file='ZTmodels.Rdata')
 ZTb = ZT_DOC$coefficients # intercept and slope for ZT ~ DOC model
 
 # Set up driver gradient ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#Scaler = c(0.7,0.8,0.9,1,1.1,1.2,1.3) # Scaling factor
 Scaler = seq(0.25,2.8,length.out=10)
 NG = length(Scaler)  # number of gradient steps)
 DOCbase = DOC  # Save the nominal value
