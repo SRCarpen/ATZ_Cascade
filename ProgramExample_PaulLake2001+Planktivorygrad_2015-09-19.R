@@ -237,14 +237,10 @@ load(file='ZTmodels.Rdata')
 ZTb = ZT_DOC$coefficients # intercept and slope for ZT ~ DOC model
 
 # Set up driver gradient ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Scaler = seq(0.25,2.8,length.out=10)
+Scaler = seq(0.4,2.5,length.out=12)
 NG = length(Scaler)  # number of gradient steps)
-DOCbase = DOC  # Save the nominal value
-I.Tbase = I.T  # Save the nominal value
-
-# Total C load
-DOC.AR = DOC*ZT  # DOC in g/m2
-I.OCvec = Scaler*I.Tbase 
+cFgrad = rep(0,NG)  # Vector to hold scaled driver
+cFbase = cF  # Save the nominal value
 
 # Vectors to hold results
 Avec = rep(0,NG)
@@ -258,14 +254,9 @@ NPPvec = rep(0,NG)
 
 for(iG in 1:NG)  { # Start gradient over parameter value
   
-  # Alter terrestrial C load, adjust ZT 
-  # Note that if dDOC/dt = I - k*DOC, then equilib DOC = I/k, 
-  #  so DOC scales linearly with input
-  DOC = Scaler[iG]*DOCbase
-  ZT = ZTb[1] + ZTb[2]*DOC
-  dz <- ZT/nZ
-  Zvec <- seq(0,ZT,by=dz)
-  I.T = Scaler[iG]*I.Tbase
+  # Modify the planktivory parameter
+  cFgrad[iG] = cFbase*Scaler[iG]
+  cF = cFgrad[iG]
   
   # Find equilibria for Experimental conditions
   Y0 = c(AC.AR,TPOCAR,ZB,Dstar) # guesses
@@ -304,14 +295,14 @@ for(iG in 1:NG)  { # Start gradient over parameter value
 
 windows()
 par(mfrow=c(2,2),cex.axis=1.2,cex.lab=1.2,mar=c(5, 4.2, 4, 2) + 0.1)
-plot(I.OCvec,Avec,type='l',lwd=2,col='forestgreen',
-     xlab = 'TPOC flux, g/(m2 d)', ylab = 'Phytos')
-plot(I.OCvec,Tvec,type='l',lwd=2,col='darkred',
-     xlab = 'TPOC flux, g/(m2 d)', ylab = 'TPOC')
-plot(I.OCvec,ZBvec,type='l',lwd=2,col='blue',
-     xlab = 'TPOC flux, g/(m2 d)', ylab = 'Zoopl')
-plot(I.OCvec,Allovec,type='l',lwd=2,col='sienna',
-     xlab = 'TPOC flux, g/(m2 d)', ylab = 'Allochthony')
+plot(cFgrad,Avec,type='l',lwd=2,col='forestgreen',
+     xlab = 'Planktivory', ylab = 'Phytos')
+plot(cFgrad,Tvec,type='l',lwd=2,col='darkred',
+     xlab = 'Planktivory', ylab = 'TPOC')
+plot(cFgrad,ZBvec,type='l',lwd=2,col='blue',
+     xlab = 'Planktivory', ylab = 'Zoopl')
+plot(cFgrad,Allovec,type='l',lwd=2,col='sienna',
+     xlab = 'Planktivory', ylab = 'Allochthony')
 
 Lsign = sign(Re(Lamvec))
 Lamda = Lsign*Mod(Lamvec)
@@ -321,7 +312,6 @@ Lsym = ifelse(imLam == 0,19,21)
 
 windows()
 par(mfrow=c(1,1),cex.axis=1.5,cex.lab=1.5,mar=c(5, 4.2, 4, 2) + 0.1)
-plot(I.OCvec,Lamda,type='p',pch=Lsym,col='red',cex=1.5,
-     xlab='TPOC flux, g/(m2 d)',ylab='Max Eigenvalue',
+plot(cFgrad,Lamda,type='p',pch=Lsym,col='red',cex=1.5,
+     xlab='Planktivory',ylab='Max Eigenvalue',
      main='Solid -> real, Open -> complex')
-
